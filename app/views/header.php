@@ -10,6 +10,8 @@
         <nav class="flex gap-6 ml-6">
             <a href="/dashboard" class="text-gray-700 hover:text-purple-700 font-medium transition">Dashboard</a>
             <a href="/notes" class="text-gray-700 hover:text-purple-700 font-medium transition">Notes</a>
+            <a href="/emotionTrack" class="text-gray-700 hover:text-purple-700 font-medium transition">Emotion</a>
+
             <a href="/memories" class="text-gray-700 hover:text-purple-700 font-medium transition">Memories</a>
         </nav>
     </div>
