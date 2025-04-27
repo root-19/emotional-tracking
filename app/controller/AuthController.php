@@ -5,6 +5,9 @@ require_once __DIR__ . '/../models/User.php';
 use root_dev\Models\User;  
 
 class AuthController {
+    public function index() {
+        require_once __DIR__ . '/../../public/index.php';
+    }
 
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

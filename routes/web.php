@@ -9,7 +9,8 @@ require_once __DIR__ . '/../app/controller/AuthController.php';
 
 // Define routes ass handler_type, action, is_protected, required_role 
 $routes = [
-    '/' => ['redirect', 'login', false],
+    '/' => ['redirect', 'index', false],
+    '/index' => [AuthController::class, 'index', false],
     '/login' => [AuthController::class, 'login', false],
     '/logout' => [AuthController::class, 'logout', true],
     '/register' => [AuthController::class, 'register', false],
@@ -18,9 +19,11 @@ $routes = [
 
     // Routes accessible to 'user'
     '/dashboard' => ['view', 'dashboard', true, 'user'],
-    '/emotionTrack' => ['view', 'emotionTrack', true, 'user'],
+    // '/emotionTrack' => ['view', 'emotionTrack', true, 'user'],
     '/notes' => ['view', 'notes', true, 'user'],
     '/memories' => ['view', 'memories', true, 'user'],
+    '/meditation' => ['view', 'meditation', true, 'user'],
+
 
     // Routes accessible to 'admin'
     '/admin/dashboard' => ['view', 'admin/dashboard', true, 'admin'],
