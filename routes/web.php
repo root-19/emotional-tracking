@@ -19,8 +19,8 @@ $routes = [
     // Routes accessible to 'user'
     '/dashboard' => ['view', 'dashboard', true, 'user'],
     '/emotionTrack' => ['view', 'emotionTrack', true, 'user'],
-    '/about' => ['view', 'about', true, 'user'],
-    '/contact' => ['view', 'contact', true, 'user'],
+    '/notes' => ['view', 'notes', true, 'user'],
+    '/memories' => ['view', 'memories', true, 'user'],
 
     // Routes accessible to 'admin'
     '/admin/dashboard' => ['view', 'admin/dashboard', true, 'admin'],

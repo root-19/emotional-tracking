@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../models/Emotion.php';
 require_once __DIR__ . '/../controller/EmotionController.php';
 
-
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1; 
 
 // Check if an emotion is being submitted
@@ -29,6 +28,20 @@ foreach ($emotions as $emotion) {
     $emotionData[$emotion['date']] = $emotion['emotion'];
 }
 
+// Count emotions for the week
+$emotionCounts = [
+    'happy' => 0,
+    'sad' => 0,
+    'good' => 0,
+    'bad' => 0,
+];
+
+foreach ($emotionData as $emotion) {
+    if (isset($emotionCounts[$emotion])) {
+        $emotionCounts[$emotion]++;
+    }
+}
+
 // Date navigation for previous and next week
 $prevMonday = date('Y-m-d', strtotime("$currentMonday -7 days"));
 $nextMonday = date('Y-m-d', strtotime("$currentMonday +7 days"));
@@ -51,7 +64,6 @@ include 'header.php';
             transform: scale(1.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
 
         tr:hover {
             background-color: #f1f5f9;
@@ -94,7 +106,7 @@ include 'header.php';
             <a href="?monday=<?= $nextMonday ?>" class="text-blue-600 hover:underline">Next →</a>
         </div>
 
-        <table class="w-full text-center border border-gray-300 rounded-lg">
+        <table class="w-full text-center border border-gray-300 rounded-lg mb-8">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="py-4 px-6 text-sm font-medium text-gray-700">Day</th>
@@ -116,6 +128,17 @@ include 'header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <!-- Display the mood analysis -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Mood Analysis for the Week</h2>
+            <ul class="list-disc pl-5">
+                <li><strong>Happy:</strong> <?= $emotionCounts['happy'] ?> days</li>
+                <li><strong>Sad:</strong> <?= $emotionCounts['sad'] ?> days</li>
+                <li><strong>Good:</strong> <?= $emotionCounts['good'] ?> days</li>
+                <li><strong>Bad:</strong> <?= $emotionCounts['bad'] ?> days</li>
+            </ul>
+        </div>
     </div>
 
 </body>
