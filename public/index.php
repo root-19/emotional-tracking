@@ -97,6 +97,14 @@
     .hide {
       display: none;
     }
+
+    /* Fade in animation for the video */
+    #bgVideo.fade-in {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 2s ease;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -112,17 +120,11 @@
   <button onclick="startMeditation()">Let it go</button>
 </div>
 
-<!-- Audio
-<audio id="bgMusic" loop style="display: none;">
-  <source src="../resources/video/music.mp3" type="audio/mpeg">
-</audio> -->
-
-<!-- Video -->
-<video id="bgVideo" autoplay loop muted 
+<!-- Background Video -->
+<video id="bgVideo" autoplay loop muted
   style="visibility: hidden; opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; z-index: -1; width: 100vw; height: 100vh;">
   <source src="../resources/video/491527291_10041145832565108_6220701080957486383_n.mp4" type="video/mp4">
 </video>
-
 
 <script>
   // Stars animation
@@ -196,7 +198,15 @@
     var circleText = document.getElementById('circleText');
     circleText.innerText = thought;
 
-    // Start showing messages
+  
+    var bgVideo = document.getElementById('bgVideo');
+    bgVideo.muted = false; 
+    bgVideo.classList.add('fade-in'); 
+    bgVideo.play().catch((error) => {
+      console.log('Video play failed:', error);
+    });
+
+  
     let messageArea = document.getElementById('messageArea');
     let index = 0;
 
@@ -212,7 +222,7 @@
         }, 4000);
       } else {
         setTimeout(() => {
-       window.location.href = "/login"
+          window.location.href = "/login"
         }, 3000);
       }
     }

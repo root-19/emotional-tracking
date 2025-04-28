@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     let currentAudio = null;
+    let countdownInterval = null;
 
     function showMusic(time) {
       document.querySelectorAll('.music-list').forEach(list => list.classList.add('hidden'));
@@ -17,22 +18,26 @@
     function playAudio(audioElement, spinner, lyricsElement) {
       if (currentAudio && currentAudio !== audioElement) {
         currentAudio.pause();
-        currentAudio.parentElement.querySelector('.spinner').classList.add('hidden');
-        const prevLyrics = currentAudio.parentElement.querySelector('.lyrics');
-        if (prevLyrics) prevLyrics.classList.add('hidden');
+        resetPreviousAudio(currentAudio);
       }
+      
       currentAudio = audioElement;
-      currentAudio.play();
+      const duration = Math.floor(audioElement.duration);
+      startCountdown(duration);
+
+      document.getElementById('button-group').classList.add('hidden');
+      document.getElementById('main-title').classList.add('hidden');
+      document.getElementById('countdown').classList.remove('hidden');
+
       spinner.classList.remove('hidden');
       lyricsElement.classList.remove('hidden');
+      
+      currentAudio.play();
 
-      currentAudio.onpause = () => {
-        spinner.classList.add('hidden');
-        lyricsElement.classList.add('hidden');
-      };
+      currentAudio.onpause = () => stopCountdown();
       currentAudio.onended = () => {
-        spinner.classList.add('hidden');
-        lyricsElement.classList.add('hidden');
+        stopCountdown();
+        setTimeout(() => location.reload(), 1000);
       };
     }
 
@@ -40,12 +45,46 @@
       document.querySelectorAll('audio').forEach(audio => {
         audio.pause();
         audio.currentTime = 0;
-        const spinner = audio.parentElement.querySelector('.spinner');
-        if (spinner) spinner.classList.add('hidden');
-        const lyrics = audio.parentElement.querySelector('.lyrics');
-        if (lyrics) lyrics.classList.add('hidden');
+        resetPreviousAudio(audio);
       });
       currentAudio = null;
+      stopCountdown();
+    }
+
+    function resetPreviousAudio(audio) {
+      const spinner = audio.parentElement.querySelector('.spinner');
+      const lyrics = audio.parentElement.querySelector('.lyrics');
+      if (spinner) spinner.classList.add('hidden');
+      if (lyrics) lyrics.classList.add('hidden');
+    }
+
+    function startCountdown(seconds) {
+      let remaining = seconds;
+      document.getElementById('countdown-timer').innerText = formatTime(remaining);
+
+      countdownInterval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          location.reload();
+        } else {
+          document.getElementById('countdown-timer').innerText = formatTime(remaining);
+        }
+      }, 1000);
+    }
+
+    function stopCountdown() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      document.getElementById('countdown').classList.add('hidden');
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs < 10 ? '0' + secs : secs}`;
     }
   </script>
   <style>
@@ -62,15 +101,22 @@
     }
   </style>
 </head>
+<body>
 
 <div class="min-h-screen flex flex-col items-center px-6 pt-10 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
 
-  <h1 class="text-5xl font-extrabold mb-12 animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-500">
+  <!-- Main Title -->
+  <h1 id="main-title" class="text-5xl font-extrabold mb-12 animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-500">
     Meditation Playlist
   </h1>
 
+  <!-- Countdown -->
+  <div id="countdown" class="text-4xl font-bold text-indigo-400 mb-12 hidden">
+    Time Remaining: <span id="countdown-timer"></span>
+  </div>
+
   <!-- Button Group -->
-  <div class="flex gap-6 mb-10">
+  <div id="button-group" class="flex gap-6 mb-10">
     <button onclick="showMusic('morning')" class="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-semibold py-2 px-8 rounded-full shadow-md hover:scale-110 transition-transform duration-300">
       Morning
     </button>
@@ -116,9 +162,9 @@
   <div id="afternoon" class="music-list hidden w-full max-w-7xl flex flex-wrap gap-6 justify-center">
     <?php 
       $afternoonMusic = [
-        ["Bright Horizon", "../../resources/image/afternoon1.jpg", "../../resources/video/afternoon1.mp4", "Sun high in the sky, endless blue and wide..."],
-        ["Midday Breeze", "../../resources/image/afternoon2.jpg", "../../resources/video/afternoon2.mp4", "Whispering winds carry dreams along..."],
-        ["Lazy Noon", "../../resources/image/afternoon3.jpg", "../../resources/video/afternoon3.mp4", "Soft and slow, the day moves gently..."],
+        ["Bright Horizon", "../../resources/image/491186488_1233494641673773_2842554514402736449_n.jpg", "../../resources/video/491506014_30347214391536018_6248472493198818994_n.mp4", "Sun high in the sky, endless blue and wide..."],
+        ["Midday Breeze", "../../resources/image/491190010_1957635444974950_4260005271893533536_n.jpg", "../../resources/video/491897414_9734825196611097_6919508935587538169_n.mp4", "Whispering winds carry dreams along..."],
+        ["Lazy Noon", "../../resources/image/491184684_1439375530377996_702826330490027647_n.jpg", "../../resources/video/494056757_9763477183698054_8223793322611642650_n.mp4", "Soft and slow, the day moves gently..."],
       ];
       foreach($afternoonMusic as $music): 
     ?>
@@ -144,9 +190,9 @@
   <div id="evening" class="music-list hidden w-full max-w-7xl flex flex-wrap gap-6 justify-center">
     <?php 
       $eveningMusic = [
-        ["Twilight Calm", "../../resources/image/evening1.jpg", "../../resources/video/evening1.mp4", "Twilight fades, the world slows down..."],
-        ["Silent Nightfall", "../../resources/image/evening2.jpg", "../../resources/video/evening2.mp4", "Stars appear, night whispers near..."],
-        ["Midnight Reflections", "../../resources/image/evening3.jpg", "../../resources/video/evening3.mp4", "Thoughts float under the midnight sky..."],
+        ["Twilight Calm", "../../resources/image/491186428_1024909026245955_8793238593760314726_n.jpg", "../../resources/video/492156520_29454918080789980_8177381556537864474_n.mp4", "Twilight fades, the world slows down..."],
+        ["Silent Nightfall", "../../resources/image/491186519_979648741035943_3778194296248305387_n.jpg", "../../resources/video/491527291_10041145832565108_6220701080957486383_n.mp4", "Stars appear, night whispers near..."],
+        ["Midnight Reflections", "../../resources/image/491188981_1750562515870089_3760467549162254654_n.jpg", "../../resources/video/491949299_30162815653305525_8168772926024598170_n.mp4", "Thoughts float under the midnight sky..."],
       ];
       foreach($eveningMusic as $music): 
     ?>
@@ -167,6 +213,8 @@
     </div>
     <?php endforeach; ?>
   </div>
+
+</div>
 
 </body>
 </html>

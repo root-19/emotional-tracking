@@ -6,7 +6,7 @@
     <div class="flex items-center gap-4">
         <!-- Logo & Brand -->
         <img src="../../resources/image/490998649_611840321893766_2785696449251422280_n.jpg" alt="Logo" class="w-10 h-10 rounded-full">
-        <h1 class="text-xl font-bold text-purple-700">Emotion Track</h1>
+        <h1 class="text-xl font-bold text-purple-700">QUASAR</h1>
 
         <!-- Navigation Links -->
         <nav class="flex gap-6 ml-6">

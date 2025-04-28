@@ -51,9 +51,8 @@ class AuthController {
             $username = $_POST['username'];
             $email = $_POST['email'];
             $password = $_POST['password'];
-            
-
-            $role = isset($_POST['role']) ? $_POST['role'] : 'user'; 
+    
+            $role = isset($_POST['role']) ? $_POST['role'] : 'user';
             $user = new User();
     
             if ($user->emailExists($email)) {
@@ -64,8 +63,12 @@ class AuthController {
                     $userData = $user->getUserByEmail($email);
                     $_SESSION['user_id'] = $userData['id'];
                     $_SESSION['username'] = $userData['username'];
-                    $_SESSION['role'] = $userData['role']; 
-                    
+                    $_SESSION['role'] = $userData['role'];
+    
+                    // Send a registration confirmation email
+                    $emailController = new EmailController();
+                    $emailController->sendRegistrationConfirmation($email, $username);
+    
                     header('Location: /dashboard');
                     exit();
                 } else {
@@ -77,7 +80,6 @@ class AuthController {
             require_once __DIR__ . '/../../public/register.php';
         }
     }
-    
 
     // Handle user logout
     public function logout() {

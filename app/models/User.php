@@ -46,4 +46,22 @@ class User {
     
         return $stmt->execute([$hashedPassword, $email]);
     }
+
+    
+    public function getAllUsers() {
+        $db = Database::connect();
+        $query = "SELECT * FROM users WHERE active = 1"; // Only active users
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // Update notification status
+    public function updateNotificationStatus($userId) {
+        $db = Database::connect();
+                $query = "UPDATE users SET notification_sent = 1, last_notification_date = NOW() WHERE id = :user_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':user_id', $userId);
+        return $stmt->execute();
+    }
 }

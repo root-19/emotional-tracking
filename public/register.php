@@ -11,7 +11,7 @@
   <!-- Register Form Section -->
   <div class="flex items-center justify-center min-h-screen">
     <div class="bg-white w-full max-w-md p-10 rounded-xl shadow-2xl">
-      <h2 class="text-4xl font-bold mb-6 text-center text-purple-700">Create Your Emotion Track Account</h2>
+      <h2 class="text-4xl font-bold mb-6 text-center text-purple-700">Create Your QUASAR Account</h2>
 
       <form action="/register" method="POST" class="space-y-5">
         <div>
