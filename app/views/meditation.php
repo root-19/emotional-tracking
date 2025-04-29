@@ -25,6 +25,19 @@
       const duration = Math.floor(audioElement.duration);
       startCountdown(duration);
 
+      // Hide other music cards and increase size of current card
+      const currentCard = audioElement.closest('.music-card');
+      document.querySelectorAll('.music-card').forEach(card => {
+        if (card !== currentCard) {
+          card.classList.add('hidden');
+        }
+      });
+      
+      // Increase size of current card and image
+      currentCard.classList.add('playing');
+      const currentImage = currentCard.querySelector('img');
+      currentImage.classList.add('playing-image');
+
       document.getElementById('button-group').classList.add('hidden');
       document.getElementById('main-title').classList.add('hidden');
       document.getElementById('countdown').classList.remove('hidden');
@@ -34,9 +47,18 @@
       
       currentAudio.play();
 
-      currentAudio.onpause = () => stopCountdown();
+      currentAudio.onpause = () => {
+        stopCountdown();
+        // Reset card and image size
+        currentCard.classList.remove('playing');
+        currentImage.classList.remove('playing-image');
+      };
+      
       currentAudio.onended = () => {
         stopCountdown();
+        // Reset card and image size
+        currentCard.classList.remove('playing');
+        currentImage.classList.remove('playing-image');
         setTimeout(() => location.reload(), 1000);
       };
     }
@@ -49,6 +71,13 @@
       });
       currentAudio = null;
       stopCountdown();
+      
+      // Show all cards and reset sizes
+      document.querySelectorAll('.music-card').forEach(card => {
+        card.classList.remove('hidden', 'playing');
+        const image = card.querySelector('img');
+        image.classList.remove('playing-image');
+      });
     }
 
     function resetPreviousAudio(audio) {
@@ -99,6 +128,35 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    .music-card {
+      transition: all 0.3s ease;
+      margin: 1rem;
+    }
+    
+    .music-card.playing {
+      width: 90%;
+      max-width: 800px;
+      margin: 2rem auto;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .playing-image {
+      height: 500px !important;
+    }
+
+    .music-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1rem;
+    }
+
+    .music-list.hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -140,8 +198,8 @@
       ];
       foreach($morningMusic as $music): 
     ?>
-    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col">
-      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover" alt="<?= $music[0] ?>">
+    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col music-card">
+      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover transition-all duration-300" alt="<?= $music[0] ?>">
       <div class="p-4 flex flex-col space-y-4">
         <div class="flex items-center gap-3">
           <div class="spinner hidden"></div>
@@ -168,8 +226,8 @@
       ];
       foreach($afternoonMusic as $music): 
     ?>
-    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col">
-      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover" alt="<?= $music[0] ?>">
+    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col music-card">
+      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover transition-all duration-300" alt="<?= $music[0] ?>">
       <div class="p-4 flex flex-col space-y-4">
         <div class="flex items-center gap-3">
           <div class="spinner hidden"></div>
@@ -196,8 +254,8 @@
       ];
       foreach($eveningMusic as $music): 
     ?>
-    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col">
-      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover" alt="<?= $music[0] ?>">
+    <div class="bg-gray-800 rounded-2xl w-80 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105 flex flex-col music-card">
+      <img src="<?= $music[1] ?>" class="w-full h-48 object-cover transition-all duration-300" alt="<?= $music[0] ?>">
       <div class="p-4 flex flex-col space-y-4">
         <div class="flex items-center gap-3">
           <div class="spinner hidden"></div>
