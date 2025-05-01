@@ -2,6 +2,8 @@
 namespace root_dev\Controller;
 
 require_once __DIR__ . '/../models/User.php'; 
+require_once __DIR__ . '/EmailController.php'; 
+use root_dev\Controller\EmailController; 
 use root_dev\Models\User;  
 
 class AuthController {
@@ -57,7 +59,9 @@ class AuthController {
     
             if ($user->emailExists($email)) {
                 $error = "Email is already registered.";
-                require_once __DIR__ . '/../views/register.php';
+                // require_once __DIR__ . '/../views/reg.php';
+                require_once __DIR__ . '/../../public/register.php';
+
             } else {
                 if ($user->register($username, $email, $password, $role)) {
                     $userData = $user->getUserByEmail($email);

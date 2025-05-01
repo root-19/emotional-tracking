@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../models/Emotion.php';
 require_once __DIR__ . '/../controller/EmotionController.php';
+require_once __DIR__ . '/../utils/TimeUtils.php';
 
 // session_start();
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
@@ -87,6 +88,76 @@ $baseSize = 80;
 $maxSize = 200;
 $currentSize = $baseSize + (($streakPercentage / 100) * ($maxSize - $baseSize));
 
+// Get current hour for time-based suggestions
+$currentHour = (int)date('H');
+$timeOfDay = getTimeOfDay($currentHour);
+
+// Meditation suggestions based on time and mood
+$meditationSuggestions = [
+    'sad' => [
+        'title' => 'Feeling Down?',
+        'message' => 'I see that you\'re feeling down right now. Here are some meditation sessions that might help:',
+        'song' => '../../resources/audio/relaxing_song.mp3',
+        'sessions' => [
+            'morning' => [
+                'title' => 'Morning Renewal Meditation',
+                'description' => 'Start your day with positive energy',
+                'video' => '../../resources/video/491527310_29956379330620043_4358568605692076484_n.mp4'
+            ],
+            'afternoon' => [
+                'title' => 'Midday Mindfulness',
+                'description' => 'Find balance in your day',
+                'video' => '../../resources/video/491506014_30347214391536018_6248472493198818994_n.mp4'
+            ],
+            'evening' => [
+                'title' => 'Evening Reflection',
+                'description' => 'Release the day\'s stress',
+                'video' => '../../resources/video/491527310_29956379330620043_4358568605692076484_n.mp4'
+            ]
+        ]
+    ],
+    'bad' => [
+        'title' => 'Having a Tough Day?',
+        'message' => 'I notice you\'re not feeling great. These meditation sessions might help:',
+        'song' => '../../resources/audio/relaxing_song.mp3',
+        'sessions' => [
+            'morning' => [
+                'title' => 'Morning Calm',
+                'description' => 'Begin your day with peace',
+                'video' => '../../resources/video/491506014_30347214391536018_6248472493198818994_n.mp4'
+            ],
+            'afternoon' => [
+                'title' => 'Stress Relief Break',
+                'description' => 'Take a moment to reset',
+                'video' => '../../resources/video/491506014_30347214391536018_6248472493198818994_n.mp4'
+            ],
+            'evening' => [
+                'title' => 'Nighttime Relaxation',
+                'description' => 'Prepare for restful sleep',
+                'video' => '../../resources/video/491897414_9734825196611097_6919508935587538169_n.mp4'
+            ]
+        ]
+    ]
+];
+
+// Determine time of day
+$hour = date('H');
+if ($hour >= 5 && $hour < 12) {
+    $timeOfDay = 'morning';
+} elseif ($hour >= 12 && $hour < 18) {
+    $timeOfDay = 'afternoon';
+} else {
+    $timeOfDay = 'evening';
+}
+
+// Check if we should display the modal
+$showModal = false;
+$emotion = '';
+if (isset($_POST['emotion']) && in_array($_POST['emotion'], ['sad', 'bad'])) {
+    $showModal = true;
+    $emotion = $_POST['emotion'];
+}
+
 include 'header.php';
 ?>
 
@@ -97,6 +168,39 @@ include 'header.php';
     <title>Track Mood</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+
+video {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            display: block;
+            background-color: #000; /* Black background to make video more visible */
+            border-radius: 8px;
+            object-fit: contain; /* Ensures video maintains aspect ratio */
+        }
+        
+        /* Fix for video controls display */
+        video::-webkit-media-controls {
+            display: flex !important;
+            visibility: visible !important;
+        }
+        
+        /* Ensure video element has appropriate dimensions */
+        .video-container {
+            width: 100%;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
         .emotion-button {
             transition: all 0.3s ease;
         }
@@ -383,45 +487,158 @@ include 'header.php';
 
         <!-- Mood Summary -->
         <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-8 shadow-lg">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Mood Analysis for the Week</h2>
-            
-            <canvas id="weeklyMoodChart" width="400" height="200"></canvas>
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Mood Analysis for the Week</h2>
+    
+    <canvas id="weeklyMoodChart" width="400" height="200"></canvas>
 
-            <?php
-            // Calculate mood scores for the week
-            $moodScores = [];
-            foreach ($weekDates as $date) {
-                $dayName = date('l', strtotime($date));
-                if (isset($emotionData[$date])) {
-                    $emotion = $emotionData[$date];
-                    // Convert emotions to scores
-                    $score = [
-                        'happy' => 5,
-                        'good' => 4,
-                        'sad' => 2,
-                        'bad' => 1
-                    ][$emotion] ?? 3;
-                    $moodScores[$dayName] = $score;
-                } else {
-                    $moodScores[$dayName] = 0; // No mood recorded
-                }
+    <?php
+    // Calculate mood scores for the week
+    $moodScores = [];
+    foreach ($weekDates as $date) {
+        $dayName = date('l', strtotime($date));
+        if (isset($emotionData[$date])) {
+            $emotion = $emotionData[$date];
+            $score = [
+                'happy' => 5,
+                'good' => 4,
+                'sad' => 2,
+                'bad' => 1
+            ][$emotion] ?? 3;
+            $moodScores[$dayName] = $score;
+        } else {
+            $moodScores[$dayName] = 0; // No mood recorded
+        }
+    }
+
+    // Filter out days with no recorded mood
+    $validScores = array_filter($moodScores);
+
+    if (count($validScores) >= 6):
+        $weeklyAverage = array_sum($validScores) / count($validScores);
+        $weekStatus = $weeklyAverage >= 3.5 ? 'Great' : 'Needs Improvement';
+    ?>
+
+    <div class="mt-6 p-4 bg-white rounded-xl shadow-sm">
+        <p class="text-xl font-bold <?= $weekStatus == 'Great' ? 'text-green-600' : 'text-red-600' ?>">
+            Overall this week: <?= $weekStatus ?>
+        </p>
+        <p class="text-gray-600 mt-2">Average mood score: <?= number_format($weeklyAverage, 1) ?> / 5.0</p>
+    </div>
+
+    <?php else: ?>
+        <div class="mt-6 p-4 bg-yellow-100 text-yellow-800 rounded-xl shadow-sm">
+            <p class="text-xl font-semibold">Not enough data yet!</p>
+            <p class="mt-1">Mood analysis will be available once you’ve logged at least 6 days of moods.</p>
+        </div>
+    <?php endif; ?>
+</div>
+<?php if ($showModal && isset($meditationSuggestions[$emotion])): ?>
+        <div id="meditationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+                <?php
+                $sessionData = $meditationSuggestions[$emotion];
+                $sessions = $sessionData['sessions'];
+                $song = $sessionData['song'];
+                ?>
+                
+                <h2 class="text-2xl font-bold text-indigo-600 mb-4"><?= $sessionData['title'] ?></h2>
+                <p class="text-gray-600 mb-6"><?= $sessionData['message'] ?></p>
+                
+                <div class="space-y-4">
+                    <?php if (isset($sessions[$timeOfDay])):
+                        $currentSession = $sessions[$timeOfDay];
+                    ?>
+                        <div class="border border-gray-200 rounded-lg p-4 hover:bg-indigo-50 transition-colors">
+                            <h3 class="font-semibold text-lg text-indigo-700"><?= $currentSession['title'] ?></h3>
+                            <p class="text-gray-600 mb-4"><?= $currentSession['description'] ?></p>
+                            
+                            <!-- Video container with proper CSS -->
+                            <div class="video-container">
+                                <video controls preload="metadata" playsinline>
+                                    <source src="<?= htmlspecialchars($currentSession['video']) ?>" type="video/mp4">
+                                    Your browser does not support the video element.
+                                </video>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-gray-600">No meditation session available for this time of day. Here's a relaxing song instead:</p>
+                    <?php endif; ?>
+                    
+                    <!-- Audio player with distinct styling -->
+                    <div class="mt-4">
+                        <p class="text-gray-600 mb-2">Relaxing Music:</p>
+                        <audio controls class="w-full">
+                            <source src="<?= htmlspecialchars($song) ?>" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex justify-end">
+                    <button onclick="closeMeditationModal()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add JavaScript for modal functionality -->
+        <script>
+            function closeMeditationModal() {
+                document.getElementById('meditationModal').style.display = 'none';
+                // Alternatively, redirect back to the main page
+                // window.location.href = 'index.php';
             }
+            
+            // Ensure video loads properly
+            document.addEventListener('DOMContentLoaded', function() {
+                const videoElements = document.querySelectorAll('video');
+                videoElements.forEach(video => {
+                    // Force video element to refresh
+                    video.load();
+                    
+                    // Check if video has loaded metadata
+                    video.addEventListener('loadedmetadata', function() {
+                        console.log('Video metadata loaded successfully');
+                    });
+                    
+                    // Log any errors loading the video
+                    video.addEventListener('error', function(e) {
+                        console.error('Error loading video:', e);
+                    });
+                });
+            });
+        </script>
+ </div>
 
-            // Calculate weekly average excluding days with no mood (score 0)
-            $validScores = array_filter($moodScores);
-            $weeklyAverage = !empty($validScores) ? array_sum($validScores) / count($validScores) : 0;
-            $weekStatus = $weeklyAverage >= 3.5 ? 'Great' : 'Needs Improvement';
-            ?>
 
-            <div class="mt-6 p-4 bg-white rounded-xl shadow-sm">
-                <p class="text-xl font-bold <?= $weekStatus == 'Great' ? 'text-green-600' : 'text-red-600' ?>">
-                    Overall this week: <?= $weekStatus ?>
-                </p>
-                <p class="text-gray-600 mt-2">Average mood score: <?= number_format($weeklyAverage, 1) ?> / 5.0</p>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-4">How was your session?</h2>
+            <p class="text-gray-600 mb-6">Do you feel better after the meditation?</p>
+            
+            <div class="flex justify-center space-x-8 mb-6">
+                <button onclick="submitFeedback('up')" class="text-4xl hover:scale-110 transition-transform">👍</button>
+                <button onclick="submitFeedback('down')" class="text-4xl hover:scale-110 transition-transform">👎</button>
+            </div>
+
+            <div class="mb-6">
+                <textarea id="feedbackComment" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                          placeholder="Share your thoughts (optional)"></textarea>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="submitFeedbackWithComment()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                    Submit Feedback
+                </button>
             </div>
         </div>
     </div>
-</div>
+<?php endif; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -536,6 +753,31 @@ include 'header.php';
         if (petContainer) {
             initPetBehavior(petContainer);
         }
+    });
+
+    function closeMeditationModal() {
+        document.getElementById('meditationModal').style.display = 'none';
+        document.getElementById('feedbackModal').style.display = 'flex';
+    }
+
+    function submitFeedback(type) {
+        // Here you would typically send the feedback to your server
+        console.log('Feedback submitted:', type);
+        document.getElementById('feedbackModal').style.display = 'none';
+    }
+
+    function submitFeedbackWithComment() {
+        const comment = document.getElementById('feedbackComment').value;
+        // Here you would typically send the feedback and comment to your server
+        console.log('Feedback submitted with comment:', comment);
+        document.getElementById('feedbackModal').style.display = 'none';
+    }
+
+    // Show meditation modal when page loads if emotion was sad or bad
+    window.addEventListener('load', () => {
+        <?php if (isset($_POST['emotion']) && in_array($_POST['emotion'], ['sad', 'bad'])): ?>
+            document.getElementById('meditationModal').style.display = 'flex';
+        <?php endif; ?>
     });
 </script>
 </body>

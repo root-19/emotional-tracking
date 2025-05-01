@@ -21,6 +21,12 @@
       position: relative;
     }
 
+    /* Special style for May 2nd */
+    body.may-second {
+      background-color: rgba(255, 255, 255, 0.8);
+      color: black;
+    }
+
     #starCanvas {
       position: absolute;
       top: 0;
@@ -117,7 +123,10 @@
 
 <div class="input-area" id="inputContainer">
   <input type="text" id="thoughtInput" placeholder="Type your thought here...">
-  <button onclick="startMeditation()">Let it go</button>
+  <div style="display: flex; gap: 10px;">
+    <button onclick="startMeditation()">Let it go</button>
+    <button onclick="window.location.href='/login'" style="background-color: #f1f1f1;">Skip</button>
+  </div>
 </div>
 
 <!-- Background Video -->
@@ -127,6 +136,16 @@
 </video>
 
 <script>
+  // Check if it's May 2nd
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentDay = today.getDate();
+  
+  // // Apply white screen only on May 2nd
+  // if (currentMonth === 4 && currentDay === 2) { // Month is 0-based, so 4 is May
+  //   document.body.classList.add('may-second');
+  // }
+
   // Stars animation
   const canvas = document.getElementById('starCanvas');
   const ctx = canvas.getContext('2d');

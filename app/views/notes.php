@@ -75,7 +75,7 @@ function saveDrawing() {
 <div class=" min-h-screen flex items-center justify-center p-6">
 
 <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-2xl space-y-6">
-    <h2 class="text-3xl font-bold text-gray-800 text-center">Create a Note</h2>
+    <h2 class="text-3xl font-bold text-gray-800 text-center">Create a Journal</h2>
 
     <div class="flex justify-center gap-4">
         <button onclick="showInput('text')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full">Journal</button>

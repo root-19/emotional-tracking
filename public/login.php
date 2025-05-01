@@ -27,7 +27,7 @@
   <div class="flex items-center justify-center full-height">
     <div class="text-center px-6">
       <h1 class="text-5xl font-bold mb-6 text-purple-800">
-        Welcome to <span class="text-pink-600">QUASAR</span>
+     <span class="text-pink-600">QUASAR</span>
       </h1>
 
       <p id="typewriter" class="text-lg text-gray-700 mb-10 typewriter-text"></p>
